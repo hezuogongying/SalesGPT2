@@ -14,7 +14,7 @@ from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResu
 from langchain_core.runnables import run_in_executor
 from langchain_openai import ChatOpenAI
 
-from salesgpt.tools import completion_bedrock
+from salesgpt.tools_cn import completion_bedrock
 
 
 class BedrockCustomModel(ChatOpenAI):

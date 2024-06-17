@@ -3,7 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain_community.chat_models import ChatLiteLLM
 
 from salesgpt.logger import time_logger
-from salesgpt.prompts import (
+from salesgpt.prompts_cn import (
     SALES_AGENT_INCEPTION_PROMPT,
     STAGE_ANALYZER_INCEPTION_PROMPT,
 )

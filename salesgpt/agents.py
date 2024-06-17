@@ -21,10 +21,10 @@ from salesgpt.chains import SalesConversationChain, StageAnalyzerChain
 from salesgpt.custom_invoke import CustomAgentExecutor
 from salesgpt.logger import time_logger
 from salesgpt.parsers import SalesConvoOutputParser
-from salesgpt.prompts import SALES_AGENT_TOOLS_PROMPT
+from salesgpt.prompts_cn import SALES_AGENT_TOOLS_PROMPT
 from salesgpt.stages import CONVERSATION_STAGES
 from salesgpt.templates import CustomPromptTemplateForTools
-from salesgpt.tools import get_tools, setup_knowledge_base
+from salesgpt.tools_cn import get_tools, setup_knowledge_base
 
 
 def _create_retry_decorator(llm: Any):

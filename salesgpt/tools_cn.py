@@ -19,9 +19,9 @@ def setup_knowledge_base(
     product_catalog: str = None, model_name: str = "gpt-3.5-turbo"
 ):
     """
-    We assume that the product catalog is simply a text string.
+    我们假设产品目录只是一个文本字符串。
     """
-    # load product catalog
+    # 加载产品目录
     with open(product_catalog, "r") as f:
         product_catalog = f.read()
 
@@ -43,7 +43,7 @@ def setup_knowledge_base(
 
 def completion_bedrock(model_id, system_prompt, messages, max_tokens=1000):
     """
-    High-level API call to generate a message with Anthropic Claude.
+    使用 Anthropic Claude 调用高级 API 来生成消息。
     """
     bedrock_runtime = boto3.client(
         service_name="bedrock-runtime", region_name=os.environ.get("AWS_REGION_NAME")
@@ -65,28 +65,28 @@ def completion_bedrock(model_id, system_prompt, messages, max_tokens=1000):
 
 
 def get_product_id_from_query(query, product_price_id_mapping_path):
-    # Load product_price_id_mapping from a JSON file
+    # 从 JSON 文件加载 Product_price_id_mapping
     with open(product_price_id_mapping_path, "r") as f:
         product_price_id_mapping = json.load(f)
 
-    # Serialize the product_price_id_mapping to a JSON string for inclusion in the prompt
+    # 将product_price_id_mapping序列化为JSON字符串以包含在提示中
     product_price_id_mapping_json_str = json.dumps(product_price_id_mapping)
 
-    # Dynamically create the enum list from product_price_id_mapping keys
+    # 从product_price_id_mapping键动态创建枚举列表
     enum_list = list(product_price_id_mapping.values()) + [
         "No relevant product id found"
     ]
     enum_list_str = json.dumps(enum_list)
 
     prompt = f"""
-    You are an expert data scientist and you are working on a project to recommend products to customers based on their needs.
-    Given the following query:
+    您是一名专家数据科学家，您正在开展一个项目，根据客户的需求向他们推荐产品。
+    给出以下查询:
     {query}
-    and the following product price id mapping:
+   以及以下产品价格 id 映射:
     {product_price_id_mapping_json_str}
-    return the price id that is most relevant to the query.
-    ONLY return the price id, no other text. If no relevant price id is found, return 'No relevant price id found'.
-    Your output will follow this schema:
+   返回与查询最相关的价格 ID。
+    仅返回价格 ID，无其他文本。如果未找到相关价格 ID，则返回“未找到相关价格 ID”。
+    您的输出将遵循此架构:
     {{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Price ID Response",
@@ -99,7 +99,7 @@ def get_product_id_from_query(query, product_price_id_mapping_path):
     }},
     "required": ["price_id"]
     }}
-    Return a valid directly parsable json, dont return in it within a code snippet or add any kind of explanation!!
+    返回一个有效的可直接解析的 json，不要在代码片段中返回它或添加任何类型的解释！
     """
     prompt += "{"
     model_name = os.getenv("GPT_MODEL", "gpt-3.5-turbo-1106")
@@ -107,7 +107,7 @@ def get_product_id_from_query(query, product_price_id_mapping_path):
     if "anthropic" in model_name:
         response = completion_bedrock(
             model_id=model_name,
-            system_prompt="You are a helpful assistant.",
+            system_prompt="你是一个得力的助手.",
             messages=[{"content": prompt, "role": "user"}],
             max_tokens=1000,
         )
@@ -154,16 +154,16 @@ def generate_stripe_payment_link(query: str) -> str:
 
 def get_mail_body_subject_from_query(query):
     prompt = f"""
-    Given the query: "{query}", analyze the content and extract the necessary information to send an email. The information needed includes the recipient's email address, the subject of the email, and the body content of the email. 
-    Based on the analysis, return a dictionary in Python format where the keys are 'recipient', 'subject', and 'body', and the values are the corresponding pieces of information extracted from the query. 
-    For example, if the query was about sending an email to notify someone of an upcoming event, the output should look like this:
+   鉴于查询: "{query}", 分析内容并提取发送电子邮件所需的信息。所需信息包括收件人的电子邮件地址、电子邮件主题和电子邮件正文内容。 
+    根据分析，返回一个Python格式的字典，其中键是“recipient”、“subject”和“body”，值是从查询中提取的相应信息。
+例如，如果查询是关于发送电子邮件以通知某人即将发生的事件，则输出应如下所示：
     {{
         "recipient": "example@example.com",
-        "subject": "Upcoming Event Notification",
-        "body": "Dear [Name], we would like to remind you of the upcoming event happening next week. We look forward to seeing you there."
+        "subject": "即将举行的活动通知",
+        "body": "亲爱的[Name]，我们想提醒您下周即将举行的活动。我们期待在那里见到您."
     }}
-    Now, based on the provided query, return the structured information as described.
-    Return a valid directly parsable json, dont return in it within a code snippet or add any kind of explanation!!
+    现在，根据提供的查询，返回所描述的结构化信息。
+    返回一个有效的可直接解析的 json，不要在代码片段中返回它或添加任何类型的解释！
     """
     model_name = os.getenv("GPT_MODEL", "gpt-3.5-turbo-1106")
 
@@ -190,33 +190,33 @@ def get_mail_body_subject_from_query(query):
 
 
 def send_email_with_gmail(email_details):
-    """.env should include GMAIL_MAIL and GMAIL_APP_PASSWORD to work correctly"""
+    """.env 应包含 GMAIL_MAIL 和 GMAIL_APP_PASSWORD 才能正常工作"""
     try:
         sender_email = os.getenv("GMAIL_MAIL")
         app_password = os.getenv("GMAIL_APP_PASSWORD")
         recipient_email = email_details["recipient"]
         subject = email_details["subject"]
         body = email_details["body"]
-        # Create MIME message
+        # 创建 MIME 消息
         msg = MIMEMultipart()
         msg["From"] = sender_email
         msg["To"] = recipient_email
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "plain"))
 
-        # Create server object with SSL option
+        # 使用 SSL 选项创建服务器对象
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.login(sender_email, app_password)
         text = msg.as_string()
         server.sendmail(sender_email, recipient_email, text)
         server.quit()
-        return "Email sent successfully."
+        return "邮件发送成功."
     except Exception as e:
-        return f"Email was not sent successfully, error: {e}"
+        return f"电子邮件未成功发送，错误: {e}"
 
 
 def send_email_tool(query):
-    """Sends an email based on the single query string"""
+    """根据单个查询字符串发送电子邮件"""
     email_details = get_mail_body_subject_from_query(query)
     if isinstance(email_details, str):
         email_details = json.loads(email_details)  # Ensure it's a dictionary
@@ -227,7 +227,7 @@ def send_email_tool(query):
 
 
 def generate_calendly_invitation_link(query):
-    """Generate a calendly invitation link based on the single query string"""
+    """根据单个查询字符串生成日历邀请链接"""
     event_type_uuid = os.getenv("CALENDLY_EVENT_UUID")
     api_key = os.getenv("CALENDLY_API_KEY")
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
@@ -243,14 +243,14 @@ def generate_calendly_invitation_link(query):
         data = response.json()
         return f"url: {data['resource']['booking_url']}"
     else:
-        return "Failed to create Calendly link: "
+        return "无法创建 Calendly 链接： "
 
 
 def get_tools(product_catalog):
-    # query to get_tools can be used to be embedded and relevant tools found
+    # 查询get_tools可用于嵌入并找到相关工具
     # see here: https://langchain-langchain.vercel.app/docs/use_cases/agents/custom_agent_with_plugin_retrieval#tool-retriever
 
-    # we only use four tools for now, but this is highly extensible!
+    # 我们目前只使用四个工具，但这是高度可扩展的！
     knowledge_base = setup_knowledge_base(product_catalog)
     tools = [
         Tool(

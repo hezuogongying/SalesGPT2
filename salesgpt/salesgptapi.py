@@ -71,10 +71,10 @@ class SalesGPTAPI:
         self.current_turn += 1
         current_turns = self.current_turn
         if current_turns >= self.max_num_turns:
-            print("Maximum number of turns reached - ending the conversation.")
+            print("达到最大回合数 -结束对话.")
             return [
                 "BOT",
-                "In case you'll have any questions - just text me one more time!",
+                "如果您有任何疑问，请再给我发短信！",
             ]
 
         if human_input is not None:
@@ -82,7 +82,7 @@ class SalesGPTAPI:
 
         ai_log = await self.sales_agent.astep(stream=False)
         await self.sales_agent.adetermine_conversation_stage()
-        # TODO - handle end of conversation in the API - send a special token to the client?
+        # TODO - 处理 API 中的对话结束 -向客户端发送特殊令牌？
         if self.verbose:
             print("=" * 10)
             print(f"AI LOG {ai_log}")
@@ -92,7 +92,7 @@ class SalesGPTAPI:
             and "<END_OF_CALL>" in self.sales_agent.conversation_history[-1]
         ):
             print("Sales Agent determined it is time to end the conversation.")
-            # strip end of call for now
+            # 暂时删除通话结束
             self.sales_agent.conversation_history[-1] = (
                 self.sales_agent.conversation_history[-1].replace("<END_OF_CALL>", "")
             )
@@ -159,10 +159,10 @@ class SalesGPTAPI:
         # TODO
         current_turns = len(conversation_history) + 1
         if current_turns >= self.max_num_turns:
-            print("Maximum number of turns reached - ending the conversation.")
+            print("达到最大回合数 -结束对话。")
             yield [
                 "BOT",
-                "In case you'll have any questions - just text me one more time!",
+                "如果您有任何疑问，请再给我发短信！",
             ]
             raise StopAsyncIteration
 
@@ -178,12 +178,10 @@ class SalesGPTAPI:
                 message = choice["delta"]["content"]
                 if message is not None:
                     if "<END_OF_CALL>" in message:
-                        print(
-                            "Sales Agent determined it is time to end the conversation."
-                        )
+                        print("销售代理确定是时候结束对话了.")
                         yield [
                             "BOT",
-                            "In case you'll have any questions - just text me one more time!",
+                            "如果您有任何疑问，请再给我发短信！",
                         ]
                     yield message
                 else:
