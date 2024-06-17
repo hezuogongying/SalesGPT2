@@ -25,7 +25,7 @@ class SalesGPTAPI:
         self.model_name = model_name
         if "anthropic" in model_name:
             self.llm = BedrockCustomModel(
-                type="bedrock-model",
+                # type="bedrock-model",
                 model=model_name,
                 system_prompt="You are a helpful assistant.",
             )
@@ -53,9 +53,11 @@ class SalesGPTAPI:
                 {
                     "use_tools": True,
                     "product_catalog": self.product_catalog,
-                    "salesperson_name": "Ted Lasso"
-                    if not self.config_path
-                    else config.get("salesperson_name", "Ted Lasso"),
+                    "salesperson_name": (
+                        "Ted Lasso"
+                        if not self.config_path
+                        else config.get("salesperson_name", "Ted Lasso")
+                    ),
                 }
             )
 
@@ -84,30 +86,30 @@ class SalesGPTAPI:
         if self.verbose:
             print("=" * 10)
             print(f"AI LOG {ai_log}")
-            
+
         if (
             self.sales_agent.conversation_history
             and "<END_OF_CALL>" in self.sales_agent.conversation_history[-1]
         ):
             print("Sales Agent determined it is time to end the conversation.")
             # strip end of call for now
-            self.sales_agent.conversation_history[
-                -1
-            ] = self.sales_agent.conversation_history[-1].replace("<END_OF_CALL>", "")
+            self.sales_agent.conversation_history[-1] = (
+                self.sales_agent.conversation_history[-1].replace("<END_OF_CALL>", "")
+            )
 
         reply = (
             self.sales_agent.conversation_history[-1]
             if self.sales_agent.conversation_history
             else ""
         )
-        #print("AI LOG INTERMEDIATE STEPS: ", ai_log["intermediate_steps"])
+        # print("AI LOG INTERMEDIATE STEPS: ", ai_log["intermediate_steps"])
 
         if (
-            self.use_tools and 
-            "intermediate_steps" in ai_log and 
-            len(ai_log["intermediate_steps"]) > 0
+            self.use_tools
+            and "intermediate_steps" in ai_log
+            and len(ai_log["intermediate_steps"]) > 0
         ):
-            
+
             try:
                 res_str = ai_log["intermediate_steps"][0]
                 print("RES STR: ", res_str)
@@ -119,11 +121,15 @@ class SalesGPTAPI:
                 )
                 actions = re.search(r"Action: (.*?)[\n]*Action Input: (.*)", log)
                 action_input = actions.group(2)
-                action_output =  res_str[1]
+                action_output = res_str[1]
                 if tool_input == action_input:
-                    action_input=""
-                    action_output = action_output.replace("<web_search>", "<a href='https://www.google.com/search?q=")
-                    action_output = action_output.replace("</web_search>", "' target='_blank' rel='noopener noreferrer'>")
+                    action_input = ""
+                    action_output = action_output.replace(
+                        "<web_search>", "<a href='https://www.google.com/search?q="
+                    )
+                    action_output = action_output.replace(
+                        "</web_search>", "' target='_blank' rel='noopener noreferrer'>"
+                    )
             except Exception as e:
                 print("ERROR: ", e)
                 tool, tool_input, action, action_input, action_output = (
