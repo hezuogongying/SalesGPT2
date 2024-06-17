@@ -17,7 +17,7 @@ class TimeFilter(logging.Filter):
 
 logger.addFilter(TimeFilter())
 
-# Configure the logging module
+# 配置日志记录模块
 logging.basicConfig(
     level=logging.INFO,
     format="%(name)s %(asctime)s - %(levelname)s - %(message)s",
@@ -27,17 +27,17 @@ logging.basicConfig(
 
 def time_logger(func):
     """
-    Decorator function to log the time taken by any function.
+    装饰器函数用于记录任何函数所花费的时间。
 
-    This decorator logs the execution time of the decorated function. It logs the start time before the function
-    execution, the end time after the function execution, and calculates the execution time. The function name and
-    execution time are then logged at the INFO level.
+    该装饰器记录被装饰函数的执行时间。它记录函数之前的开始时间
+    执行，函数执行后的结束时间，并计算执行时间。函数名称和
+    然后将执行时间记录在 INFO 级别。
 
     Args:
-        func (Callable): The function to be decorated.
+        func (Callable): 要装饰的功能。
 
     Returns:
-        Callable: The decorated function.
+        Callable: 装饰函数.
     """
 
     @wraps(func)

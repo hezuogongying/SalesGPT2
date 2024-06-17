@@ -10,7 +10,7 @@ from salesgpt.prompts import (
 
 
 class StageAnalyzerChain(LLMChain):
-    """Chain to analyze which conversation stage should the conversation move into."""
+    """链来分析对话应该进入哪个对话阶段。"""
 
     @classmethod
     @time_logger
@@ -40,8 +40,17 @@ class SalesConversationChain(LLMChain):
         verbose: bool = True,
         use_custom_prompt: bool = False,
         custom_prompt: str = "You are an AI Sales agent, sell me this pencil",
-    ) -> LLMChain:
-        """Get the response parser."""
+    ):
+        """获取响应解析器.
+        Parameters:
+            llm (ChatLiteLLM): 语言模型
+            verbose (bool): 是否打印日志
+            use_custom_prompt (bool): 是否使用自定义的对话模板
+            custom_prompt (str): 自定义的对话模板
+        Returns:
+            LLMChain: 响应解析器
+        """
+
         if use_custom_prompt:
             sales_agent_inception_prompt = custom_prompt
             prompt = PromptTemplate(

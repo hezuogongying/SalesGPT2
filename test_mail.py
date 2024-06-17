@@ -1,31 +1,33 @@
 import os
-from salesgpt.tools  import send_email_with_gmail  # Adjust the import path as necessary
+from salesgpt.tools import send_email_with_gmail  # 根据需要调整导入路径
 from dotenv import load_dotenv
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 load_dotenv()
-# Set environment variables for the test
+
+
+# 设置测试环境变量
 def send_simple_email(recipient_email, subject, body):
     try:
         sender_email = os.getenv("GMAIL_MAIL")
         app_password = os.getenv("GMAIL_APP_PASSWORD")
         print(sender_email)
         print(app_password)
-        # Ensure sender email and app password are not None
+        # 确保发件人电子邮件和应用程序密码不是“无”
         if not sender_email or not app_password:
             return "Sender email or app password not set."
 
-        # Create MIME message
+        # 创建 MIME 消息
         msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = recipient_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body, "plain"))
 
-        # Create server object with SSL option
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        # 使用 SSL 选项创建服务器对象
+        server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(sender_email, app_password)
         text = msg.as_string()
@@ -35,11 +37,12 @@ def send_simple_email(recipient_email, subject, body):
     except Exception as e:
         return f"Failed to send email: {e}"
 
-# Test email details
+
+# 测试电子邮件详细信息
 recipient_email = "makovoz.ilja@gmail.com"
 subject = "Test Email"
 body = "This is a test email sent from the Python script without using LLM."
 
-# Send the test email
+# 发送测试电子邮件
 result = send_simple_email(recipient_email, subject, body)
 print(result)

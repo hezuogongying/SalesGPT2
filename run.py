@@ -11,24 +11,24 @@ from salesgpt.agents import SalesGPT
 
 load_dotenv()  # loads .env file
 
-# Suppress warnings
+# 抑制警告
 warnings.filterwarnings("ignore")
 
-# Suppress logging
+# 禁止记录
 logging.getLogger().setLevel(logging.CRITICAL)
 
-# LangSmith settings section, set TRACING_V2 to "true" to enable it
-# or leave it as it is, if you don't need tracing (more info in README)
+# LangSmith 设置部分，将 TRACING_V2 设置为“true”以启用它
+# 或者保留原样，如果您不需要跟踪（自述文件中的更多信息）
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_SMITH_API_KEY", "")
 os.environ["LANGCHAIN_PROJECT"] = ""  # insert you project name here
 
 if __name__ == "__main__":
-    # Initialize argparse
+    # 初始化argparse
     parser = argparse.ArgumentParser(description="Description of your program")
 
-    # Add arguments
+    # 添加参数
     parser.add_argument(
         "--config", type=str, help="Path to agent config file", default=""
     )
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         default=10,
     )
 
-    # Parse arguments
+    # 解析参数
     args = parser.parse_args()
 
-    # Access arguments
+    # 访问参数
     config_path = args.config
     verbose = args.verbose
     max_num_turns = args.max_num_turns
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             break
         sales_agent.step()
 
-        # end conversation
+        # 结束对话
         if "<END_OF_CALL>" in sales_agent.conversation_history[-1]:
             print("Sales Agent determined it is time to end the conversation.")
             break

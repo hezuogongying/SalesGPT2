@@ -1,8 +1,8 @@
-# Corrected import statements
+# 更正进口声明
 import inspect
 from typing import Any, Dict, Optional
 
-# Corrected import path for RunnableConfig
+# 更正了 RunnableConfig 的导入路径
 from langchain.agents import AgentExecutor
 from langchain.callbacks.manager import CallbackManager
 from langchain.chains.base import Chain
@@ -17,10 +17,22 @@ class CustomAgentExecutor(AgentExecutor):
         input: Dict[str, Any],
         config: Optional[RunnableConfig] = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
-        intermediate_steps = []  # Initialize the list to capture intermediate steps
+    ):
+        """
+        使用给定的输入和配置调用代理。
 
-        # Ensure the configuration is set up correctly
+        Args:
+            input: 要传递给代理的输入数据。
+            config: 代理的配置.
+            **kwargs: 要传递给代理的其他关键字参数。
+
+        Returns:Dict[str, Any]
+            代理的输出.
+
+        """
+        intermediate_steps = []  # 初始化列表以捕获中间步骤
+
+        # 确保配置设置正确
         config = ensure_config(config)
         callbacks = config.get("callbacks")
         tags = config.get("tags")
@@ -29,7 +41,7 @@ class CustomAgentExecutor(AgentExecutor):
         include_run_info = kwargs.get("include_run_info", False)
         return_only_outputs = kwargs.get("return_only_outputs", False)
 
-        # Prepare inputs based on the provided input
+        # 根据提供的输入准备输入
         inputs = self.prep_inputs(input)
         callback_manager = CallbackManager.configure(
             callbacks,
@@ -41,7 +53,7 @@ class CustomAgentExecutor(AgentExecutor):
             self.metadata,
         )
 
-        # Check if the _call method supports the new argument 'run_manager'
+        # 检查 _call 方法是否支持新参数 'run_manager'
         new_arg_supported = inspect.signature(self._call).parameters.get("run_manager")
         run_manager = callback_manager.on_chain_start(
             dumpd(self),
@@ -49,37 +61,37 @@ class CustomAgentExecutor(AgentExecutor):
             name=run_name,
         )
 
-        # Capture the start of the chain as an intermediate step
+        # 捕获链的开头作为中间步骤
         intermediate_steps.append(
             {"event": "Chain Started", "details": "Inputs prepared"}
         )
 
         try:
-            # Execute the _call method, passing 'run_manager' if supported
+            # 执行 _call 方法，如果支持则传递 'run_manager'
             outputs = (
                 self._call(inputs, run_manager=run_manager)
                 if new_arg_supported
                 else self._call(inputs)
             )
-            # Capture a successful call as an intermediate step
+            # 捕获成功的调用作为中间步骤
             intermediate_steps.append({"event": "Call Successful", "outputs": outputs})
         except BaseException as e:
-            # Handle errors and capture them as intermediate steps
+            # 处理错误并将其捕获为中间步骤
             run_manager.on_chain_error(e)
             intermediate_steps.append({"event": "Error", "error": str(e)})
             raise e
         finally:
-            # Mark the end of the chain execution
+            # 标记链执行结束
             run_manager.on_chain_end(outputs)
 
-        # Prepare the final outputs, including run information if requested
+        # 准备最终输出，包括运行信息（如果需要）
         final_outputs: Dict[str, Any] = self.prep_outputs(
             inputs, outputs, return_only_outputs
         )
         if include_run_info:
             final_outputs["run_info"] = RunInfo(run_id=run_manager.run_id)
 
-        # Include intermediate steps in the final outputs
+        # 在最终输出中包含中间步骤
         final_outputs["intermediate_steps"] = intermediate_steps
 
         return final_outputs

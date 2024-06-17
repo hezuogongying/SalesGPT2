@@ -27,13 +27,13 @@ from salesgpt.templates import CustomPromptTemplateForTools
 from salesgpt.tools import get_tools, setup_knowledge_base
 
 
-def _create_retry_decorator(llm: Any) -> Callable[[Any], Any]:
+def _create_retry_decorator(llm: Any):
     """
-    Creates a retry decorator for handling OpenAI API errors.
+    创建一个重试装饰器来处理 OpenAI API 错误。
 
-    This function creates a retry decorator that will retry a function call
-    if it raises any of the specified OpenAI API errors. The maximum number of retries
-    is determined by the 'max_retries' attribute of the 'llm' object.
+    该函数创建一个重试装饰器，它将重试函数调用
+    如果它引发任何指定的 OpenAI API 错误。最大重试次数
+    由“llm”对象的“max_retries”属性确定。
 
     Args:
         llm (Any): An object that has a 'max_retries' attribute specifying the maximum number of retries.
@@ -41,6 +41,7 @@ def _create_retry_decorator(llm: Any) -> Callable[[Any], Any]:
     Returns:
         Callable[[Any], Any]: A retry decorator.
     """
+
     import openai
 
     errors = [
@@ -54,7 +55,7 @@ def _create_retry_decorator(llm: Any) -> Callable[[Any], Any]:
 
 
 class SalesGPT(Chain):
-    """Controller model for the Sales Agent."""
+    """销售代理的控制器模型."""
 
     conversation_history: List[str] = []
     conversation_stage_id: str = "1"
@@ -71,17 +72,23 @@ class SalesGPT(Chain):
     salesperson_name: str = "Ted Lasso"
     salesperson_role: str = "Business Development Representative"
     company_name: str = "Sleep Haven"
-    company_business: str = "Sleep Haven is a premium mattress company that provides customers with the most comfortable and supportive sleeping experience possible. We offer a range of high-quality mattresses, pillows, and bedding accessories that are designed to meet the unique needs of our customers."
-    company_values: str = "Our mission at Sleep Haven is to help people achieve a better night's sleep by providing them with the best possible sleep solutions. We believe that quality sleep is essential to overall health and well-being, and we are committed to helping our customers achieve optimal sleep by offering exceptional products and customer service."
-    conversation_purpose: str = "find out whether they are looking to achieve better sleep via buying a premier mattress."
+    company_business: str = (
+        "Sleep Haven is a premium mattress company that provides customers with the most comfortable and supportive sleeping experience possible. We offer a range of high-quality mattresses, pillows, and bedding accessories that are designed to meet the unique needs of our customers."
+    )
+    company_values: str = (
+        "Our mission at Sleep Haven is to help people achieve a better night's sleep by providing them with the best possible sleep solutions. We believe that quality sleep is essential to overall health and well-being, and we are committed to helping our customers achieve optimal sleep by offering exceptional products and customer service."
+    )
+    conversation_purpose: str = (
+        "find out whether they are looking to achieve better sleep via buying a premier mattress."
+    )
     conversation_type: str = "call"
 
     def retrieve_conversation_stage(self, key):
         """
-        Retrieves the conversation stage based on the provided key.
+        根据提供的密钥检索对话阶段。
 
-        This function uses the key to look up the corresponding conversation stage in the conversation_stage_dict dictionary.
-        If the key is not found in the dictionary, it defaults to "1".
+        该函数使用key在conversation_stage_dict字典中查找相应的对话阶段。
+        如果字典中没有找到该键，则默认为“1”.
 
         Args:
             key (str): The key to look up in the conversation_stage_dict dictionary.
@@ -92,12 +99,12 @@ class SalesGPT(Chain):
         return self.conversation_stage_dict.get(key, "1")
 
     @property
-    def input_keys(self) -> List[str]:
+    def input_keys(self):
         """
-        Property that returns a list of input keys.
+        返回输入键列表的属性。
 
-        This property is currently set to return an empty list. It can be overridden in a subclass to return a list of keys
-        that are used to extract input data from a dictionary.
+        该属性当前设置为返回空列表。可以在子类中重写它以返回键列表
+        用于从字典中提取输入数据.
 
         Returns:
             List[str]: An empty list.
@@ -105,12 +112,12 @@ class SalesGPT(Chain):
         return []
 
     @property
-    def output_keys(self) -> List[str]:
+    def output_keys(self):
         """
-        Property that returns a list of output keys.
+        返回输出键列表的属性。
 
-        This property is currently set to return an empty list. It can be overridden in a subclass to return a list of keys
-        that are used to extract output data from a dictionary.
+        该属性当前设置为返回空列表。可以在子类中重写它以返回键列表
+        用于从字典中提取输出数据。
 
         Returns:
             List[str]: An empty list.
@@ -120,9 +127,9 @@ class SalesGPT(Chain):
     @time_logger
     def seed_agent(self):
         """
-        This method seeds the conversation by setting the initial conversation stage and clearing the conversation history.
+        此方法通过设置初始对话阶段并清除对话历史记录来播种对话。
 
-        The initial conversation stage is retrieved using the key "1". The conversation history is reset to an empty list.
+        使用键“1”检索初始对话阶段。对话历史记录将重置为空列表。
 
         Returns:
             None
@@ -133,19 +140,18 @@ class SalesGPT(Chain):
     @time_logger
     def determine_conversation_stage(self):
         """
-        Determines the current conversation stage based on the conversation history.
+                根据对话历史记录判断当前对话阶段。
 
-        This method uses the stage_analyzer_chain to analyze the conversation history and determine the current stage.
-        The conversation history is joined into a single string, with each entry separated by a newline character.
-        The current conversation stage ID is also passed to the stage_analyzer_chain.
+                该方法使用 stage_analyzer_chain 来分析对话历史并确定当前阶段。
+                对话历史记录被连接成一个字符串，每个条目由换行符分隔。
+                当前对话阶段 ID 也会传递到 stage_analyzer_chain。
+        然后该方法打印确定的会话阶段 ID 并检索相应的会话阶段
+                使用retrieve_conversation_stage 方法从conversation_stage_dict 字典中获取。
 
-        The method then prints the determined conversation stage ID and retrieves the corresponding conversation stage
-        from the conversation_stage_dict dictionary using the retrieve_conversation_stage method.
+                最后，该方法打印确定的对话阶段.
 
-        Finally, the method prints the determined conversation stage.
-
-        Returns:
-            None
+                Returns:
+                    None
         """
         print(f"Conversation Stage ID before analysis: {self.conversation_stage_id}")
         print("Conversation history:")
@@ -178,19 +184,18 @@ class SalesGPT(Chain):
     @time_logger
     async def adetermine_conversation_stage(self):
         """
-        Determines the current conversation stage based on the conversation history.
+                根据对话历史记录判断当前对话阶段。
 
-        This method uses the stage_analyzer_chain to analyze the conversation history and determine the current stage.
-        The conversation history is joined into a single string, with each entry separated by a newline character.
-        The current conversation stage ID is also passed to the stage_analyzer_chain.
+                该方法使用 stage_analyzer_chain 来分析对话历史并确定当前阶段。
+                对话历史记录被连接成一个字符串，每个条目由换行符分隔。
+                当前对话阶段 ID 也会传递到 stage_analyzer_chain。
+        然后该方法打印确定的会话阶段 ID 并检索相应的会话阶段
+                使用retrieve_conversation_stage 方法从conversation_stage_dict 字典中获取。
 
-        The method then prints the determined conversation stage ID and retrieves the corresponding conversation stage
-        from the conversation_stage_dict dictionary using the retrieve_conversation_stage method.
+                最后，该方法打印确定的对话阶段.
 
-        Finally, the method prints the determined conversation stage.
-
-        Returns:
-            None
+                Returns:
+                    None
         """
         print(f"Conversation Stage ID before analysis: {self.conversation_stage_id}")
         print("Conversation history:")
@@ -222,9 +227,9 @@ class SalesGPT(Chain):
 
     def human_step(self, human_input):
         """
-        Processes the human input and appends it to the conversation history.
+        处理人工输入并将其附加到对话历史记录中。
 
-        This method takes the human input as a string, formats it by adding "User: " at the beginning and " <END_OF_TURN>" at the end, and then appends this formatted string to the conversation history.
+        此方法将人工输入作为字符串，通过在开头添加“User:”和在末尾添加“<END_OF_TURN>”来格式化它，然后将此格式化字符串附加到对话历史记录中.
 
         Args:
             human_input (str): The input string from the human user.
@@ -238,16 +243,16 @@ class SalesGPT(Chain):
     @time_logger
     def step(self, stream: bool = False):
         """
-        Executes a step in the conversation. If the stream argument is set to True,
-        it returns a streaming generator object for manipulating streaming chunks in downstream applications.
-        If the stream argument is set to False, it calls the _call method with an empty dictionary as input.
+        执行对话中的一个步骤。如果流参数设置为 True，
+         它返回一个流生成器对象，用于在下游应用程序中操作流块。
+         如果流参数设置为 False，它将使用空字典作为输入来调用 _call 方法。
 
-        Args:
-            stream (bool, optional): A flag indicating whether to return a streaming generator object.
-            Defaults to False.
+         Args:
+             stream (bool, optional): A flag indicating whether to return a streaming generator object.
+             Defaults to False.
 
-        Returns:
-            Generator: A streaming generator object if stream is set to True. Otherwise, it returns None.
+         Returns:
+             Generator: A streaming generator object if stream is set to True. Otherwise, it returns None.
         """
         if not stream:
             return self._call(inputs={})
@@ -257,10 +262,10 @@ class SalesGPT(Chain):
     @time_logger
     async def astep(self, stream: bool = False):
         """
-        Executes an asynchronous step in the conversation.
+        在对话中执行异步步骤。
 
-        If the stream argument is set to False, it calls the _acall method with an empty dictionary as input.
-        If the stream argument is set to True, it returns a streaming generator object for manipulating streaming chunks in downstream applications.
+        如果流参数设置为 False，它将使用空字典作为输入来调用 _acall 方法。
+        如果流参数设置为 True，它将返回一个流生成器对象，用于在下游应用程序中操作流块。
 
         Args:
             stream (bool, optional): A flag indicating whether to return a streaming generator object.
@@ -276,13 +281,12 @@ class SalesGPT(Chain):
 
     @time_logger
     async def acall(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-    
         """
-        Executes one step of the sales agent.
+        执行销售代理的一个步骤。
 
-        This function overrides the input temporarily with the current state of the conversation,
-        generates the agent's utterance using either the sales agent executor or the sales conversation utterance chain,
-        adds the agent's response to the conversation history, and returns the AI message.
+        此函数用对话的当前状态暂时覆盖输入，
+        使用销售代理执行器或销售对话话语链生成代理的话语，
+        将代理的响应添加到对话历史记录中，并返回 AI 消息。
 
         Parameters
         ----------
@@ -338,12 +342,12 @@ class SalesGPT(Chain):
     @time_logger
     def _prep_messages(self):
         """
-        Prepares a list of messages for the streaming generator.
+        为流生成器准备消息列表。
 
-        This method prepares a list of messages based on the current state of the conversation.
-        The messages are prepared using the 'prep_prompts' method of the 'sales_conversation_utterance_chain' object.
-        The prepared messages include details about the current conversation stage, conversation history, salesperson's name and role,
-        company's name, business, values, conversation purpose, and conversation type.
+        此方法根据对话的当前状态准备消息列表。
+        这些消息是使用“sales_conversation_utterance_chain”对象的“prep_prompts”方法准备的。
+        准备好的消息包括有关当前对话阶段、对话历史记录、销售人员的姓名和角色的详细信息，
+        公司名称、业务、价值观、对话目的和对话类型。
 
         Returns:
             list: A list of prepared messages to be passed to a streaming generator.
@@ -377,11 +381,11 @@ class SalesGPT(Chain):
     @time_logger
     def _streaming_generator(self):
         """
-        Generates a streaming generator for partial LLM output manipulation.
+        生成用于部分 LLM 输出操作的流生成器​​。
 
-        This method is used when the sales agent needs to take an action before the full LLM output is available.
-        For example, when performing text to speech on the partial LLM output. The method returns a streaming generator
-        which can manipulate partial output from an LLM in-flight of the generation.
+        当销售代理需要在完整的 LLM 输出可用之前采取行动时，可以使用此方法。
+        例如，在部分 LLM 输出上执行文本转语音时。该方法返回一个流生成器
+        它可以操纵正在生成的法学硕士的部分输出。
 
         Returns
         -------
@@ -411,17 +415,17 @@ class SalesGPT(Chain):
 
     async def acompletion_with_retry(self, llm: Any, **kwargs: Any) -> Any:
         """
-        Use tenacity to retry the async completion call.
+        使用坚韧重试异步完成调用。
 
-        This method uses the tenacity library to retry the asynchronous completion call in case of failure.
-        It creates a retry decorator using the '_create_retry_decorator' method and applies it to the
-        '_completion_with_retry' function which makes the actual asynchronous completion call.
+        此方法使用 tenacity 库在失败时重试异步完成调用。
+        它使用 '_create_retry_decorator' 方法创建一个重试装饰器，并将其应用于
+        '_completion_with_retry' 函数进行实际的异步完成调用。
 
         Parameters
         ----------
         llm : Any
             The language model to be used for the completion.
-        \*\*kwargs : Any
+        **kwargs : Any
             Additional keyword arguments to be passed to the completion function.
 
         Returns
@@ -445,28 +449,28 @@ class SalesGPT(Chain):
 
     async def _astreaming_generator(self):
         """
-        Asynchronous generator to reduce I/O blocking when dealing with multiple
-        clients simultaneously.
+        异步生成器在处理多个数据时减少 I/O 阻塞
+         客户同时。
 
-        This function returns a streaming generator which can manipulate partial output from an LLM
-        in-flight of the generation. This is useful in scenarios where the sales agent wants to take an action
-        before the full LLM output is available. For instance, if we want to do text to speech on the partial LLM output.
+         该函数返回一个流生成器，它可以操作 LLM 的部分输出
+         正在飞翔的一代。这在销售代理想要采取行动的场景中非常有用
+         在完整的法学硕士输出可用之前。例如，如果我们想对部分 LLM 输出进行文本到语音转换。
 
-        Returns
-        -------
-        AsyncGenerator
-            A streaming generator which can manipulate partial output from an LLM in-flight of the generation.
+         Returns
+         -------
+         AsyncGenerator
+             A streaming generator which can manipulate partial output from an LLM in-flight of the generation.
 
-        Examples
-        --------
-        >>> streaming_generator = self._astreaming_generator()
-        >>> async for chunk in streaming_generator:
-        >>>     await chunk ...
-        Out: Chunk 1, Chunk 2, ... etc.
+         Examples
+         --------
+         >>> streaming_generator = self._astreaming_generator()
+         >>> async for chunk in streaming_generator:
+         >>>     await chunk ...
+         Out: Chunk 1, Chunk 2, ... etc.
 
-        See Also
-        --------
-        https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb
+         See Also
+         --------
+         https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb
         """
 
         messages = self._prep_messages()
@@ -479,23 +483,22 @@ class SalesGPT(Chain):
             model=self.model_name,
         )
 
-    def _call(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def _call(self, inputs: Dict[str, Any]):
         """
-        Executes one step of the sales agent.
+        执行销售代理的一个步骤。
 
-        This function overrides the input temporarily with the current state of the conversation,
-        generates the agent's utterance using either the sales agent executor or the sales conversation utterance chain,
-        adds the agent's response to the conversation history, and returns the AI message.
+         此函数用对话的当前状态暂时覆盖输入，
+         使用销售代理执行器或销售对话话语链生成代理的话语，
+         将代理的响应添加到对话历史记录中，并返回 AI 消息。
+         Parameters
+         ----------
+         inputs : Dict[str, Any]
+             The initial inputs for the sales agent.
 
-        Parameters
-        ----------
-        inputs : Dict[str, Any]
-            The initial inputs for the sales agent.
-
-        Returns
-        -------
-        Dict[str, Any]
-            The AI message generated by the sales agent.
+         Returns
+         -------
+         Dict[str, Any]
+             The AI message generated by the sales agent.
 
         """
         # override inputs temporarily
@@ -540,28 +543,27 @@ class SalesGPT(Chain):
 
     @classmethod
     @time_logger
-    def from_llm(cls, llm: ChatLiteLLM, verbose: bool = False, **kwargs) -> "SalesGPT":
+    def from_llm(cls, llm: ChatLiteLLM, verbose: bool = False, **kwargs):
         """
-        Class method to initialize the SalesGPT Controller from a given ChatLiteLLM instance.
+               用于从给定 ChatLiteLLM 实例初始化 SalesGPT 控制器的类方法。
 
-        This method sets up the stage analyzer chain and sales conversation utterance chain. It also checks if custom prompts
-        are to be used and if tools are to be set up for the agent. If tools are to be used, it sets up the knowledge base,
-        gets the tools, sets up the prompt, and initializes the agent with the tools. If tools are not to be used, it sets
-        the sales agent executor and knowledge base to None.
+                该方法建立了阶段分析链和销售对话话语链。它还检查是否有自定义提示
+                是否要使用以及是否要为代理设置工具。如果要使用工具，它会建立知识库，
+                获取工具、设置提示并使用工具初始化代理。如果不使用工具，则设置
+        销售代理执行者和知识库为“无”。
+                Parameters
+                ----------
+                llm : ChatLiteLLM
+                    The ChatLiteLLM instance to initialize the SalesGPT Controller from.
+                verbose : bool, optional
+                    If True, verbose output is enabled. Default is False.
+                **kwargs : dict
+                    Additional keyword arguments.
 
-        Parameters
-        ----------
-        llm : ChatLiteLLM
-            The ChatLiteLLM instance to initialize the SalesGPT Controller from.
-        verbose : bool, optional
-            If True, verbose output is enabled. Default is False.
-        \*\*kwargs : dict
-            Additional keyword arguments.
-
-        Returns
-        -------
-        SalesGPT
-            The initialized SalesGPT Controller.
+                Returns
+                -------
+                SalesGPT
+                    The initialized SalesGPT Controller.
         """
         stage_analyzer_chain = StageAnalyzerChain.from_llm(llm, verbose=verbose)
         sales_conversation_utterance_chain = SalesConversationChain.from_llm(

@@ -1,36 +1,43 @@
-# SalesGPT Frontend Application
+# SalesGPT 前端应用程序
 
-### Overview
+＃＃＃ 概述
 
-This repository contains the frontend application for SalesGPT, a tool designed for testing and debugging purposes. Built on the Next.js platform, it provides a user-friendly interface to interact with the SalesGPT functionalities.
+该存储库包含 SalesGPT 的前端应用程序，这是一种专为测试和调试目的而设计的工具。它建立在 Next.js 平台之上，提供了一个用户友好的界面来与 SalesGPT 功能进行交互。
 
-### Installation
+### 安装
 
-To set up the project environment, follow these steps:
+要设置项目环境，请按以下步骤操作：
 
-1. Clone the repository to your local machine.
-2. Navigate to the frontend directory: `cd frontend/`
-3. Install all the necessary dependencies: `npm install`
+1. 将存储库克隆到本地计算机。
+2. 导航到前端目录：`cd frontend/`
+3. 安装所有必需的依赖项：`npm install`
   
-### Running the Application
-
-To start the frontend server, run the following command:
+### 运行应用程序
+node>18.0
+要启动前端服务器，请运行以下命令：
 `npm run dev`
-After starting the server, the application will be available at [localhost:3000/chat](http://localhost:3000/chat). 
 
-### Backend Dependency
-
-This frontend application is designed to work in conjunction with a FastAPI backend. To initiate the backend server, execute the following command from the SalesGPT/ directory: `uvicorn run_api:app --port 8000`
+如果您的 Node.js 版本低于 18.0，则需要使用以下命令：
+`npm run dev-legacy`
 
 
-## Setup help 
-If you want your setup to enable local startup using our frontend please make sure the ENVIRONMENT environment variable is set to a different value than "deployment". 
+### 构建应用程序
+npm run build
+该命令将编译前端应用程序并启动开发服务器。
+
+启动服务器后，应用程序将在 [localhost:3000/chat](http://localhost:3000/chat) 上可用。 
+
+### 后端依赖
+该前端应用程序旨在与 FastAPI 后端结合使用。要启动后端服务器，请从 SalesGPT/目录执行以下命令：`uvicorn run_api:app --port 8000`
 
 
-## Contributing
+## 设置帮助 
+如果您希望您的设置能够使用我们的前端启用本地启动，请确保 ENVIRONMENT 环境变量设置为与“部署”不同的值。 
 
-We welcome contributions to the SalesGPT frontend application. Please feel free to submit pull requests or open issues to suggest improvements or add new features.
 
-## License
+## 贡献
+我们欢迎对 SalesGPT 前端应用程序做出贡献。请随时提交拉取请求或打开问题以提出改进建议或添加新功能。
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+＃＃ 执照
+
+该项目根据 MIT 许可证获得许可 -有关详细信息，请参阅许可证文件。

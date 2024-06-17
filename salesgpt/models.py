@@ -1,3 +1,7 @@
+import aioboto3
+import aiohttp
+import os
+import json
 from typing import Any, AsyncIterator, Dict, Iterator, List, Optional
 
 from langchain_core.callbacks import (
@@ -14,12 +18,12 @@ from salesgpt.tools import completion_bedrock
 
 
 class BedrockCustomModel(ChatOpenAI):
-    """A custom chat model that echoes the first `n` characters of the input.
+    """自定义聊天模型，回显输入的前“n”个字符。
 
-    When contributing an implementation to LangChain, carefully document
-    the model including the initialization parameters, include
-    an example of how to initialize the model and include any relevant
-    links to the underlying models documentation or API.
+    在向 LangChain 贡献实现时，请仔细记录
+    该模型包括初始化参数，包括
+    如何初始化模型并包含任何相关的示例
+    指向底层模型文档或 API 的链接。
 
     Example:
 
@@ -33,7 +37,7 @@ class BedrockCustomModel(ChatOpenAI):
 
     model: str
     system_prompt: str
-    """The number of characters from the last message of the prompt to be echoed."""
+    """要回显的提示的最后一条消息的字符数."""
 
     def _generate(
         self,
@@ -41,21 +45,23 @@ class BedrockCustomModel(ChatOpenAI):
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
         **kwargs: Any,
-    ) -> ChatResult:
-        """Override the _generate method to implement the chat model logic.
+    ):
+        """重写 _generate 方法来实现聊天模型逻辑。
 
-        This can be a call to an API, a call to a local model, or any other
-        implementation that generates a response to the input prompt.
+        这可以是对 API 的调用、对本地模型的调用或任何其他
+        生成对输入提示的响应的实现。
 
         Args:
-            messages: the prompt composed of a list of messages.
-            stop: a list of strings on which the model should stop generating.
-                  If generation stops due to a stop token, the stop token itself
-                  SHOULD BE INCLUDED as part of the output. This is not enforced
-                  across models right now, but it's a good practice to follow since
-                  it makes it much easier to parse the output of the model
-                  downstream and understand why generation stopped.
-            run_manager: A run manager with callbacks for the LLM.
+            messages: 由消息列表组成的提示。
+            stop: 模型应停止生成的字符串列表。
+                  如果由于停止令牌而停止生成，则停止令牌本身
+                  应作为输出的一部分包含在内。这并没有强制执行
+                  现在跨模型，但这是一个很好的实践，因为
+                  它使解析模型的输出变得更加容易
+                  下游并了解发电停止的原因。
+            run_manager: 带有 LLM 回调的运行管理器.
+        Returns:
+            ChatResult: 包含生成的消息的 ChatResult 对象。
         """
         last_message = messages[-1]
 
@@ -71,7 +77,7 @@ class BedrockCustomModel(ChatOpenAI):
         message = AIMessage(content=content)
         generation = ChatGeneration(message=message)
         return ChatResult(generations=[generation])
-    
+
     async def _agenerate(
         self,
         messages: List[BaseMessage],
@@ -80,10 +86,24 @@ class BedrockCustomModel(ChatOpenAI):
         stream: Optional[bool] = None,
         **kwargs: Any,
     ) -> ChatResult:
+        """async 版本的 _generate 方法
+
+        Args:
+            messages (List[BaseMessage]): _description_
+            stop (Optional[List[str]], optional): _description_. Defaults to None.
+            run_manager (Optional[AsyncCallbackManagerForLLMRun], optional): _description_. Defaults to None.
+            stream (Optional[bool], optional): _description_. Defaults to None.
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            ChatResult: _description_
+        """
         should_stream = stream if stream is not None else self.streaming
         if should_stream:
             raise NotImplementedError("Streaming not implemented")
-        
+
         last_message = messages[-1]
 
         print(messages)
@@ -108,16 +128,15 @@ class BedrockCustomModel(ChatOpenAI):
         # response = await self.async_client.create(messages=message_dicts, **params)
         # return self._create_chat_result(response)
 
-import aioboto3
-import os
-import json
 
-async def acompletion_bedrock(model_id, system_prompt, messages, max_tokens=1000):
+async def acompletion_bedrock2(model_id, system_prompt, messages, max_tokens=1000):
     """
-    High-level API call to generate a message with Anthropic Claude, refactored for async.
+    使用 Anthropic Claude 生成消息的高级 API 调用，针对异步进行了重构。
     """
     session = aioboto3.Session()
-    async with session.client(service_name="bedrock-runtime", region_name=os.environ.get("AWS_REGION_NAME")) as bedrock_runtime:
+    async with session.client(
+        service_name="bedrock-runtime", region_name=os.environ.get("AWS_REGION_NAME")
+    ) as bedrock_runtime:
 
         body = json.dumps(
             {
@@ -133,10 +152,40 @@ async def acompletion_bedrock(model_id, system_prompt, messages, max_tokens=1000
         # print('RESPONSE', response)
 
         # Correctly handle the streaming body
-        response_body_bytes = await response['body'].read()
+        response_body_bytes = await response["body"].read()
         # print('RESPONSE BODY', response_body_bytes)
         response_body = json.loads(response_body_bytes.decode("utf-8"))
         # print('RESPONSE BODY', response_body)
 
         return response_body
 
+
+async def acompletion_bedrock(model_id, system_prompt, messages, max_tokens=1000):
+    """
+    使用 Anthropic Claude 生成消息的高级 API 调用，针对异步进行了重构。
+    """
+    # 建立请求头
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f'Bearer {os.environ.get("AWS_ACCESS_KEY_ID")}',
+    }
+
+    # 请求体
+    body = json.dumps(
+        {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": max_tokens,
+            "system": system_prompt,
+            "messages": messages,
+        }
+    )
+
+    # 异步 HTTP 请求
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            f"https://bedrock-runtime.{os.environ.get('AWS_REGION_NAME')}.amazonaws.com/models/{model_id}/invoke",
+            headers=headers,
+            data=body,
+        ) as response:
+            response_text = await response.text()
+            return json.loads(response_text)

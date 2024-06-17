@@ -89,19 +89,18 @@ async def chat_with_sales_agent(
     authorization: Optional[str] = Header(None),
 ):
     """
-    Handles chat interactions with the sales agent.
+        处理与销售代理的聊天互动。
 
-    This endpoint receives a message from the user and returns the sales agent's response. It supports session management to maintain context across multiple interactions with the same user.
+        该端点接收来自用户的消息并返回销售代理的响应。它支持会话管理，以维护与同一用户的多次交互的上下文。
 
-    Args:
-        req (MessageList): A request object containing the session ID and the message from the human user.
-        stream (bool, optional): A flag to indicate if the response should be streamed. Currently, streaming is not implemented.
+        参数：
+            req (MessageList)：包含会话 ID 和来自人类用户的消息的请求对象。
+            Stream（布尔型，可选）：指示是否应流式传输响应的标志。目前，流媒体尚未实现。
+    返回：
+            如果请求流式传输，它将返回 StreamingResponse 对象（尚未实现）。否则，它返回销售代理对用户消息的响应。
 
-    Returns:
-        If streaming is requested, it returns a StreamingResponse object (not yet implemented). Otherwise, it returns the sales agent's response to the user's message.
-
-    Note:
-        Streaming functionality is planned but not yet available. The current implementation only supports synchronous responses.
+        笔记：
+            流媒体功能已计划但尚未可用。当前的实现仅支持同步响应。
     """
     sales_api = None
     if os.getenv("ENVIRONMENT") == "production":
