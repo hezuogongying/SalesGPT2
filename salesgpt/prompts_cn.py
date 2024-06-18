@@ -43,7 +43,7 @@ SALES_AGENT_TOOLS_PROMPT = """
 ```
 
 你必须根据之前的对话历史和你所处的对话阶段来回应。
-一次只能生成一个回应，并且只能以{salesperson_name}的身份行动！
+一次只能生成一个回应，并且只能以{salesperson_name}的身份行动！全部用中文回答！
 
 开始！
 

@@ -16,7 +16,7 @@ class SalesGPTAPI:
         verbose: bool = True,
         max_num_turns: int = 20,
         model_name: str = "gpt-3.5-turbo",
-        product_catalog: str = "examples/sample_product_catalog.txt",
+        product_catalog: str = "examples/sample_product_catalog_cn.txt",
         use_tools=True,
     ):
         self.config_path = config_path
